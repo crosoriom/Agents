@@ -33,10 +33,10 @@ graph TD
     subgraph "Phase 2: User Request (Real-time)"
         direction TB
         F[User Query\n'e.g., best noise-cancelling headphones under $300'] --> G{"Shop Communication Orchestrator"}
-        G -- Checks Shop Registry --> H{"Adaptive Prioritization\nBased on stored performance:\nlatency, success rate, data richness"}
-        H -- 1. MCP --> I((MCP Server/Gateway))
-        H -- 2. API --> J((API Endpoint))
-        H -- 3. Web Scraping --> K((Web Scraping Target))
+        G -- Checks Shop Registry --> H{"Adaptive Prioritization \n Based on stored performance: \n latency, success rate, data richness"}
+        H -- 1 MCP --> I((MCP Server/Gateway))
+        H -- 2 API --> J((API Endpoint))
+        H -- 3 Web Scraping --> K((Web Scraping Target))
         I --> L[Data Processing and Normalization Layer]
         J --> L
         K --> L
