@@ -13,7 +13,7 @@ graph TD
     subgraph Legend
         direction LR
         L1[Core Agent Process]
-        L2{{"(Decision / Logic)"}}
+        L2{{'(Decision / Logic)'}}
         L3[(Data Store)]
         L4((External System))
         style L1 fill:#e6f3ff,stroke:#333
@@ -24,25 +24,25 @@ graph TD
 
     subgraph "Phase 1: Initialization & Continuous Learning (Background Process)"
         direction TB
-        A[User Location Input e.g., "New York, NY"] --> B{Store Discovery Engine};
+        A[User Location Input e.g., 'New York, NY'] --> B{Store Discovery Engine};
         B --> C[Identify Local/National/International Stores];
-        C --> D{{"Health Check & Method Verification <br/> (Ping MCP/API, Test Scrape)"}};
+        C --> D{{'Health Check & Method Verification <br/> (Ping MCP/API, Test Scrape)'}};
         D --> E[Populate/Update Shop Registry];
     end
 
     subgraph "Phase 2: User Request (Real-time)"
         direction TB
-        F[User Query <br/> e.g., "best noise-cancelling headphones under $300"] --> G{Shop Communication Orchestrator};
-        G -- "Checks Shop Registry" --> H{{"Adaptive Prioritization <br/>(Based on stored performance: <br/>latency, success rate, data richness)"}};
-        H -- "1. MCP" --> I((MCP Server/Gateway));
-        H -- "2. API" --> J((API Endpoint));
-        H -- "3. Web Scraping" --> K((Web Scraping Target));
+        F[User Query <br/> e.g., 'best noise-cancelling headphones under $300'] --> G{Shop Communication Orchestrator};
+        G -- 'Checks Shop Registry' --> H{{'Adaptive Prioritization <br/>(Based on stored performance: <br/>latency, success rate, data richness)'}};
+        H -- '1. MCP' --> I((MCP Server/Gateway));
+        H -- '2. API' --> J((API Endpoint));
+        H -- '3. Web Scraping' --> K((Web Scraping Target));
         I --> L[Data Processing & Normalization Layer];
         J --> L;
         K --> L;
-        L -- "Applies Advanced NLP <br/>(Aspect-Based Sentiment, <br/>Trustworthiness Score)" --> M{Decision-Making Engine};
+        L -- 'Applies Advanced NLP <br/>(Aspect-Based Sentiment, <br/>Trustworthiness Score)' --> M{Decision-Making Engine};
         N[(User Preferences<br/>Explicit & Implicit)] --> M;
-        M -- "Multi-Criteria Analysis<br/>(Price, Quality, Preferences)" --> O[Ranked Recommendations];
+        M -- 'Multi-Criteria Analysis<br/>(Price, Quality, Preferences)' --> O[Ranked Recommendations];
         O --> P[User Interface <br/>(with 'Why this choice?' Explanations)];
     end
     
@@ -53,8 +53,8 @@ graph TD
     L --> KB;
     M --> KB;
 
-    KB -- "Periodic Trigger (e.g., weekly)" --> B;
-    P -- "Implicit Feedback (clicks, choices)" --> N
+    KB -- 'Periodic Trigger (e.g., weekly)' --> B;
+    P -- 'Implicit Feedback (clicks, choices)' --> N
 
     style G fill:#fff0e6,stroke:#333
     style H fill:#fff0e6,stroke:#333
