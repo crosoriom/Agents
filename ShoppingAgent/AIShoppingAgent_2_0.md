@@ -13,7 +13,7 @@ graph TD
     subgraph Legend
         direction LR
         L1[Core Agent Process]
-        L2{{'(Decision / Logic)'}}
+        L2{"Decision / Logic"}
         L3[(Data Store)]
         L4((External System))
         style L1 fill:#e6f3ff,stroke:#333
