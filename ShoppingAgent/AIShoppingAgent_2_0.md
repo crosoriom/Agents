@@ -24,37 +24,37 @@ graph TD
 
     subgraph "Phase 1: Initialization & Continuous Learning (Background Process)"
         direction TB
-        A[User Location Input e.g., 'New York, NY'] --> B{Store Discovery Engine};
-        B --> C[Identify Local/National/International Stores];
-        C --> D{{'Health Check & Method Verification <br/> (Ping MCP/API, Test Scrape)'}};
-        D --> E[Populate/Update Shop Registry];
+        A[User Location Input e.g., 'New York, NY'] --> B{"Store Discovery Engine"}
+        B --> C[Identify Local, National and International Stores]
+        C --> D{"Health Check & Method Verification\n(Ping MCP/API, Test Scrape)"}
+        D --> E[Populate/Update Shop Registry]
     end
 
     subgraph "Phase 2: User Request (Real-time)"
         direction TB
-        F[User Query <br/> e.g., 'best noise-cancelling headphones under $300'] --> G{Shop Communication Orchestrator};
-        G -- 'Checks Shop Registry' --> H{{'Adaptive Prioritization <br/>(Based on stored performance: <br/>latency, success rate, data richness)'}};
-        H -- '1. MCP' --> I((MCP Server/Gateway));
-        H -- '2. API' --> J((API Endpoint));
-        H -- '3. Web Scraping' --> K((Web Scraping Target));
-        I --> L[Data Processing & Normalization Layer];
-        J --> L;
-        K --> L;
-        L -- 'Applies Advanced NLP <br/>(Aspect-Based Sentiment, <br/>Trustworthiness Score)' --> M{Decision-Making Engine};
-        N[(User Preferences<br/>Explicit & Implicit)] --> M;
-        M -- 'Multi-Criteria Analysis<br/>(Price, Quality, Preferences)' --> O[Ranked Recommendations];
-        O --> P[User Interface <br/>(with 'Why this choice?' Explanations)];
+        F[User Query\n'e.g., best noise-cancelling headphones under $300'] --> G{"Shop Communication Orchestrator"}
+        G -- Checks Shop Registry --> H{"Adaptive Prioritization\nBased on stored performance:\nlatency, success rate, data richness"}
+        H -- 1. MCP --> I((MCP Server/Gateway))
+        H -- 2. API --> J((API Endpoint))
+        H -- 3. Web Scraping --> K((Web Scraping Target))
+        I --> L[Data Processing and Normalization Layer]
+        J --> L
+        K --> L
+        L -- Applies Advanced NLP:\nAspect-Based Sentiment,\nTrustworthiness Score --> M{"Decision-Making Engine"}
+        N[(User Preferences\nExplicit and Implicit)] --> M
+        M -- Multi-Criteria Analysis:\nPrice, Quality, Preferences --> O[Ranked Recommendations]
+        O --> P[User Interface\nwith 'Why this choice?' Explanations]
     end
-    
-    KB[(Knowledge Base<br/>Unified Product Schema<br/>Shop Registry & Performance Metrics)]
 
-    E --> KB;
-    G --> KB;
-    L --> KB;
-    M --> KB;
+    KB[(Knowledge Base\nUnified Product Schema,\nShop Registry and Performance Metrics)]
 
-    KB -- 'Periodic Trigger (e.g., weekly)' --> B;
-    P -- 'Implicit Feedback (clicks, choices)' --> N
+    E --> KB
+    G --> KB
+    L --> KB
+    M --> KB
+
+    KB -- Periodic Trigger\n(e.g., weekly) --> B
+    P -- Implicit Feedback\n(clicks, choices) --> N
 
     style G fill:#fff0e6,stroke:#333
     style H fill:#fff0e6,stroke:#333
