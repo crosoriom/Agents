@@ -17,7 +17,12 @@ def print_results(results):
 
 def main():
     ai_agent = AIAgent()
-    ai_agent.perform_initial_setup()
+
+    print("Welcome to the AI Shopping Agent!")
+    print("First, I need to build my knowledge base of stores.")
+    location = input("Please enter your location (e.g., 'New York, NY', 'San Francisco, CA'): ")
+    
+    ai_agent.perform_initial_setup(location)
     
     # Show initial (default) performance
     ai_agent.display_shop_performance()

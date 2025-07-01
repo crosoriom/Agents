@@ -34,14 +34,21 @@ class KnowledgeBase:
                               )
                               """)
 
-    def add_shop(self, name, scope, mcp=False, api=False, scraping=True) -> None:
-        """Adds a new shop with its communication capabilities."""
+    def add_shop(self, name, scope, mcp=False, api=False, scraping=True):
+        """
+        Adds a new shop if it doesn't exist. Uses INSERT OR IGNORE to prevent
+        crashing on duplicate names.
+        """
         with self.conn:
-            self.conn.execute(
-                "INSERT INTO shops (name, scope, mcp_enabled, api_enabled, scraping_enabled) VALUES (?, ?, ?, ?, ?)",
+            cursor = self.conn.execute(
+                "INSERT OR IGNORE INTO shops (name, scope, mcp_enabled, api_enabled, scraping_enabled) VALUES (?, ?, ?, ?, ?)",
                 (name, scope, mcp, api, scraping)
             )
-            print(f"[KB] Added Shop: {name}")
+            # The cursor.rowcount will be 1 if a row was inserted, and 0 if it was ignored.
+            if cursor.rowcount > 0:
+                print(f"[KB] Added Shop: {name}")
+            else:
+                print(f"[KB] Shop '{name}' already exists. Ignoring duplicate.")
 
     def get_all_shops(self):
         """Retrieves all shops and their details from the database."""
