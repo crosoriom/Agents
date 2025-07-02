@@ -5,10 +5,6 @@ DB_FILE = "shops.db"
 
 class KnowledgeBase:
     def __init__(self) -> None:
-        # Delete old DB file for a clean start during development
-        if os.path.exists(DB_FILE):
-            os.remove(DB_FILE)
-
         self.conn = sqlite3.connect(DB_FILE, check_same_thread=False)
         self.create_table()
 
