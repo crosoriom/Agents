@@ -1,57 +1,83 @@
-from agent import AIAgent
+import os
+from dotenv import load_dotenv
+from knowledge_base import KnowledgeBase
+from discovery import find_local_stores, get_national_stores, get_international_stores, verify_communication_methods
+from llm_agent import LLMAgent
 
-def print_results(results):
-    if not results:
-        print("Sorry, I couldn't find any matching products.")
-        return
-        
-    print("\n" + "*"*50)
-    print("              Top Recommendations")
-    print("*"*50)
-    for i, product in enumerate(results):
-        print(f"#{i+1}: {product['name']} from {product['shop_name']}")
-        print(f"  - Price: ${product['price']:.2f}")
-        print(f"  - Quality Score: {product['quality_score']:.1f}/10.0")
-        print(f"  - Final Rank Score: {product['rank_score']:.3f}")
-        print("-" * 20)
+# Load environment variables from a .env file
+load_dotenv()
+
+def perform_initial_setup(kb: KnowledgeBase):
+    """
+    Performs the 'First Use' phase by discovering, verifying
+    and adding stores to the Knowledge Base.
+    """
+    location = input("Please enter your location to find local stores (e.g., 'New York, NY'): ")
+    print(f"\n[Setup] Performing store discovery for location: '{location}'...")
+
+    all_discovered_stores = []
+    all_discovered_stores.extend(find_local_stores(location))
+    all_discovered_stores.extend(get_national_stores())
+    all_discovered_stores.extend(get_international_stores())
+
+    print(f"\n[Setup] Verifying communication methods for all discovered stores...")
+    for store_info in all_discovered_stores:
+        # --- VERIFICATION STEP ---
+        # In a real app, you might have more robust checks here
+        verified_methods = verify_communication_methods(store_info['name'])
+
+        kb.add_shop(
+            name=store_info['name'],
+            scope=store_info['scope'],
+            mcp=verified_methods.get('mcp', False),
+            api=verified_methods.get('api', False),
+            scraping=True
+        )
+
+    print("\n[Setup] Initial setup complete. Knowledge Base is populated.")
+
 
 def main():
-    ai_agent = AIAgent()
+    """
+    The main entry point for the LLM-powered shopping agent.
+    """
+    if not os.getenv("GEMINI_API_KEY"):
+        print("\nFATAL ERROR: GEMINI_API_KEY environment variable not set.")
+        return
 
-    print("Welcome to the AI Shopping Agent!")
-    print("First, I need to build my knowledge base of stores.")
-    location = input("Please enter your location (e.g., 'New York, NY', 'San Francisco, CA'): ")
-    
-    ai_agent.perform_initial_setup(location)
-    
-    # Show initial (default) performance
-    ai_agent.display_shop_performance()
+    # 1. Initialize the Knowledge Base
+    kb = KnowledgeBase()
 
-    preferences = {'price': 0.5, 'quality': 0.5} # Default balanced preference
+    # 2. Run the discovery and setup process
+    perform_initial_setup(kb)
+    
+    # 3. Initialize the LLM Agent, giving it the populated Knowledge Base
+    print("\n[Main] Initializing the AI Shopping Assistant with discovered store data...")
+    llm_agent = LLMAgent(knowledge_base=kb)
+    print("[Main] AI Assistant is ready.")
+
+    print("\nWelcome to the AI Shopping Assistant!")
+    print("I will search for products in the stores I've just discovered.")
 
     while True:
-        print("\nWhat would you like to search for? (type 'pref' to change preferences, 'quit' to exit)")
+        print("\nWhat would you like to search for? (type 'quit' to exit)")
         query = input("> ")
 
         if query.lower() == 'quit':
+            print("Goodbye!")
             break
         
-        if query.lower() == 'pref':
-            try:
-                price_weight = float(input("Enter weight for price (0.0 to 1.0): "))
-                quality_weight = float(input("Enter weight for quality (0.0 to 1.0): "))
-                total = price_weight + quality_weight
-                preferences = {'price': price_weight/total, 'quality': quality_weight/total}
-                print(f"Preferences updated: Price {preferences['price']:.2f}, Quality {preferences['quality']:.2f}")
-            except ValueError:
-                print("Invalid input. Please enter numbers.")
+        if not query.strip():
             continue
+            
+        final_recommendation = llm_agent.process_user_query(query)
 
-        results = ai_agent.search_products(query, preferences)
-        print_results(results)
+        print("\n" + "*"*50)
+        print("      AI Assistant Recommendation")
+        print("*"*50)
+        print(final_recommendation)
+        print("*"*50)
 
-        # After each search, show how the agent has "learned"
-        ai_agent.display_shop_performance()
 
 if __name__ == "__main__":
     main()
