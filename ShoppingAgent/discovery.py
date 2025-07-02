@@ -1,5 +1,6 @@
 import requests
 import os
+import re
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -7,6 +8,62 @@ load_dotenv()
 
 API_KEY = os.getenv('GOOGLE_PLACES_API_KEY')
 PLACES_API_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+
+# Helper function to clean names for domain guessing
+def _clean_shop_name_for_domain(name):
+    """Cleans a shop name to guess its domain name."""
+    name = name.lower()
+
+    # Remove common corporate suffixes
+    name = re.sub(r'\b(inc|llc|ltd|co|corp)\b', '', name)
+    # Remove special characters
+    name = re.sub(r'[^\w\s-]', '', name)
+    # Replace spaces and multiple dashes with a single dash
+    name = re.sub(r'[\s-]+', '-', name)
+    # Remove leading/trailing dashes
+    name = name.strip('-')
+    return name
+
+# Helper function to check if an endpoint exists
+def _check_endpoint(url):
+    """
+    Performs a lightweight HEAD request to check if a server exists at the URL.
+    Returns True if it gets any response, even an error like 401/403.
+    """
+    try:
+        # Use a short timeout to not hang the discovery process
+        response = requests.head(url, timeout=3, allow_redirects=True)
+        # Any status code below 500 (Server Error) suggests the endpoint exists,
+        # even if it's 401 (Unauthorized) or 403 (Forbidden), which is common for APIs.
+        if response.status_code < 500:
+            print(f"    ✓ Found endpoint: {url} (Status: {response.status_code})")
+            return True
+    except requests.exceptions.RequestException:
+        # This catches timeouts, connection errors, etc.
+        print(f"    ✗ No endpoint found at: {url}")
+        pass
+    return False
+
+# The main verification function
+def verify_communication_methods(shop_name):
+    """
+    Verifies MCP and API capabilities by checking for common subdomains.
+    """
+    print(f"    - Verifying communication methods for '{shop_name}'...")
+    cleaned_name = _clean_shop_name_for_domain(shop_name)
+
+    # We will assume a .com TLD for this project, which is a reasonable simplification.
+    domain = f"{cleaned_name}.com"
+
+    # Check for API subdomain
+    api_url = f"https://api.{domain}"
+    api_enabled = _check_endpoint(api_url)
+
+    # Check for MCP subdomain
+    mcp_url = f"https://mcp.{domain}"
+    mcp_enabled = _check_endpoint(mcp_url)
+
+    return {'api': api_enabled, 'mcp': mcp_enabled}
 
 def get_coordinates_for_location(location_name):
     """

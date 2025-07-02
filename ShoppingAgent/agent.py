@@ -1,7 +1,7 @@
 from knowledge_base import KnowledgeBase
 from orchestrator import ShopCommunicationOrchestrator
 from processing import normalize_data, make_decision
-from discovery import find_local_stores, get_national_stores, get_international_stores
+from discovery import find_local_stores, get_national_stores, get_international_stores, verify_communication_methods
 
 class AIAgent:
     def __init__(self):
@@ -12,42 +12,27 @@ class AIAgent:
 
     def perform_initial_setup(self, user_location):
         """
-        Performs the 'First Use' phase by discovering and adding stores
-        from real-world data sources.
+        Performs the 'First Use' phase by discovering, verifying
+        and adding stores to the Knowledge Base.
         """
         print(f"\n[Agent] Performing initial store discovery for location: '{user_location}'...")
 
-        # 1. Discover local stores
-        local_stores = find_local_stores(user_location)
-        for store in local_stores:
+        all_discovered_stores = []
+        all_discovered_stores.extend(find_local_stores(user_location))
+        all_discovered_stores.extend(get_national_stores())
+        all_discovered_stores.extend(get_international_stores())
+
+        print(f"\n[Agent] Beginning verification process for all discovered stores...")
+        for store_info in all_discovered_stores:
+            # --- VERIFICATION STEP ---
+            verified_methods = verify_communication_methods(store_info['name'])
+
             self.kb.add_shop(
-                name=store['name'],
-                scope=store['scope'],
-                mcp=False,
-                api=False,
+                name=store_info['name'],
+                scope=store_info['scope'],
+                mcp=verified_methods['mcp'],
+                api=verified_methods['api'],
                 scraping=True
-            )
-
-        # 2. Add national stores
-        national_stores = get_national_stores()
-        for store in national_stores:
-            self.kb.add_shop(
-                name=store['name'],
-                scope=store['scope'],
-                mcp=store.get('mcp', False),
-                api=store.get('api', False),
-                scraping=store.get('scrapping', True)
-            )
-
-        # 3. Add international stores
-        international_stores = get_international_stores()
-        for store in international_stores:
-            self.kb.add_shop(
-                name=store['name'],
-                scope=store['scope'],
-                mcp=store.get('mcp', False),
-                api=store.get('api', False),
-                scraping=store.get('scrapping', True)
             )
 
         self.is_setup_complete = True

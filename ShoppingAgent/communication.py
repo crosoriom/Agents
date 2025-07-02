@@ -2,12 +2,21 @@
 import time
 import random
 
+# A list of stores we are 'faking' real API/MCP support for in this simulation
+KNOWN_API_STORES = ['Best Buy', 'Walmart', 'B&H Photo Video', 'Amazon']
+KNOWN_MCP_STORES = ['Amazon'] # Let's pretend only Amazon has adopted MCP
+
 def fetch_mcp(shop_name, query):
     """Simulates fetching data from a shop's MCP endpoint."""
     print(f"  > Attempting MCP connection to {shop_name} for '{query}'...")
     latency = random.uniform(0.1, 0.5) # MCP is fast
     time.sleep(latency)
     
+    # Fail realistically if the shop isn't known to have MCP
+    if shop_name not in KNOWN_MCP_STORES:
+        print(f"  ✗ MCP Failed for {shop_name} (Protocol not supported by handler).")
+        return None, latency, False
+
     # Simulate a high success rate for MCP
     if random.random() < 0.98: 
         print(f"  ✓ MCP Success from {shop_name}")
@@ -25,6 +34,11 @@ def fetch_api(shop_name, query):
     print(f"  > Attempting API connection to {shop_name} for '{query}'...")
     latency = random.uniform(0.3, 1.0) # API is a bit slower
     time.sleep(latency)
+
+    # Fail realistically if the shop isn't known to have an API handler
+    if shop_name not in KNOWN_API_STORES:
+        print(f"  ✗ API Failed for {shop_name} (Endpoint valid, but no specific handler implemented).")
+        return None, latency, False
 
     # Simulate a good success rate for API
     if random.random() < 0.90:
