@@ -84,7 +84,7 @@ def get_coordinates_for_location(location_name):
         print(f"  - Could not find coordinates for '{location_name}'. Using default.")
         return "40.7128,-74.0060" # Default to NYC
 
-def find_local_stores(location_name, radius_metters=5000):
+def find_local_stores(location_name, radius_metters=50000):
     """
     Uses the Google Places API to find local electronics stores.
     """
@@ -100,7 +100,7 @@ def find_local_stores(location_name, radius_metters=5000):
         'key': API_KEY
     }
 
-    print(f"[Discovery] Aearching for local stores near {location_name}...")
+    print(f"[Discovery] Searching for local stores near {location_name}...")
     try:
         response = requests.get(PLACES_API_URL, params=params)
         response.raise_for_status()

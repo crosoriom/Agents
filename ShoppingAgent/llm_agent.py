@@ -76,8 +76,9 @@ class LLMAgent:
                     config=self.config
                 )
 
-                # The finish reason check is incorrect. It should be checked against the FinishReason enum.
-                if response.candidates[0].finish_reason == types.FinishReason.TOOL_CALL:
+                # The old check 'response.candidates[0].finish_reason == types.FinishReason.TOOL_CALL' is incorrect.
+                # The new, correct way is to directly check if 'response.function_calls' exists and has content.
+                if response.function_calls:
                     print("[LLM Agent] Gemini is requesting a tool call.")
                     # Append the model's request to the history
                     conversation_history.append(response.candidates[0].content)
