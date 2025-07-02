@@ -30,7 +30,7 @@ class LLMAgent:
         self.model_name = 'models/gemini-2.5-flash' 
 
         self.system_prompt = f"""
-You are an advanced AI Shopping Assistant with a dynamic Knowledge Base (KB) that you MUST keep up-to-date.
+        You are an advanced AI Shopping Assistant with a dynamic Knowledge Base (KB) that you MUST keep up-to-date.
         Your primary goal is to find the best products for the user by following a strict, cyclical reasoning process.
 
         **Core Reasoning Cycle:**
@@ -44,15 +44,7 @@ You are an advanced AI Shopping Assistant with a dynamic Knowledge Base (KB) tha
             - Execute the appropriate communication tool (`fetch_products_via_mcp`, `make_http_get_request`, or `scrape_and_summarize_website_text`).
             - **CRITICAL:** The output from these tools is a JSON string containing `result`, `success`, and `latency`. You MUST parse this JSON to get the data.
 
-        3.  **Write to KB (ALWAYS Step 3):**
-            - Immediately after receiving the output from a communication tool, your very next action **MUST** be to call `update_shop_performance_in_kb()`.
-            - Use the `shop_name` you targeted and the `success` and `latency` values from the tool's output to call this function.
-            - You must correctly map the tool used to the `method` parameter:
-                - `fetch_products_via_mcp` -> `method='mcp'`
-                - `make_http_get_request` -> `method='api'`
-                - `scrape_and_summarize_website_text` -> `method='scraping'`
-
-        4.  **Synthesize & Respond (Step 4):**
+        3.  **Synthesize & Respond (Step 4):**
             - After updating the KB, analyze the `result` data you received.
             - If you need to search other stores, go back to Step 2 and repeat the cycle.
             - Once you have enough information, present the top 3 products to the user, unless they ask for a different number.
