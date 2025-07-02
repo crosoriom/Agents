@@ -3,7 +3,7 @@ import json
 from google import genai
 from google.genai import types
 from knowledge_base import KnowledgeBase
-from tools import scrape_and_summarize_website_text, make_http_get_requests, fetch_products_via_mcp
+from tools import ToolBox
 
 class LLMAgent:
     def __init__(self, knowledge_base: KnowledgeBase):
@@ -17,11 +17,8 @@ class LLMAgent:
         # The new SDK uses a client object to make API calls.
         self.client = genai.Client()
 
-        self.tool_functions = {
-            "scrape_and_summarize_website_text": scrape_and_summarize_website_text,
-            "make_http_get_requests": make_http_get_requests,
-            "fetch_products_via_mcp": fetch_products_via_mcp
-        }
+        self.toolbox = ToolBox(knowledge_base)
+        self.tool_functions = self.toolbox.get_tool_functions()
         
         # CORRECT: Tools are passed in the GenerateContentConfig.
         # The new SDK uses a GenerateContentConfig object to pass configuration, including tools.
@@ -32,24 +29,35 @@ class LLMAgent:
         # The model name should include the 'models/' prefix. This is correct.
         self.model_name = 'models/gemini-2.5-flash' 
 
-        all_shops = knowledge_base.get_all_shops()
-        shop_list_str = "\n".join(
-            [f"- {shop['name']} (Scope: {shop['scope']}, Supports MCP: {shop['mcp_enabled']}, Supports API: {shop['api_enabled']})" for shop in all_shops]
-        )
-
         self.system_prompt = f"""
-        You are an expert AI Shopping Assistant. Your primary goal is to find and recommend the best products for a user based on their request.
-        **CRITICAL INSTRUCTION**: You MUST conduct your search using ONLY the following list of pre-approved stores. This list has been verified. Do not search anywhere else.
-        **Available Stores:**
-        {shop_list_str}
-        Follow these steps:
-        1.  **Analyze the Query:** Understand the user's request (product, features, constraints).
-        2.  **Use Your Tools Strategically:**
-            - For stores where 'Supports MCP' is True (like Amazon), you should prioritize using the `fetch_products_via_mcp` tool.
-            - For other stores, try to use `make_http_get_requests` or `scrape_and_summarize_website_text` to find products. Construct URLs logically (e.g., 'https://www.bestbuy.com/search?q=...').
-        3.  **Evaluate and Score:** Gather product information and internally score each product against the user's request.
-        4.  **Formulate and Present Recommendation:** Select the top 3 products and present them to the user, explaining *why* each is a good choice.
-        If you cannot find good matches in the provided stores, inform the user. Do not make up products.
+You are an advanced AI Shopping Assistant with a dynamic Knowledge Base (KB) that you MUST keep up-to-date.
+        Your primary goal is to find the best products for the user by following a strict, cyclical reasoning process.
+
+        **Core Reasoning Cycle:**
+
+        1.  **Read from KB (ALWAYS Step 1):**
+            - At the start of every new user query, your absolute first action must be `get_shop_details_from_kb()`. This gives you the current state of all known stores, their capabilities, and their performance metrics.
+
+        2.  **Plan & Act (Step 2):**
+            - Analyze the KB data and the user's request.
+            - Formulate a plan, prioritizing the best-performing methods (MCP > API > Scraping). Use the latency and success rates from the KB to inform your choice.
+            - Execute the appropriate communication tool (`fetch_products_via_mcp`, `make_http_get_request`, or `scrape_and_summarize_website_text`).
+            - **CRITICAL:** The output from these tools is a JSON string containing `result`, `success`, and `latency`. You MUST parse this JSON to get the data.
+
+        3.  **Write to KB (ALWAYS Step 3):**
+            - Immediately after receiving the output from a communication tool, your very next action **MUST** be to call `update_shop_performance_in_kb()`.
+            - Use the `shop_name` you targeted and the `success` and `latency` values from the tool's output to call this function.
+            - You must correctly map the tool used to the `method` parameter:
+                - `fetch_products_via_mcp` -> `method='mcp'`
+                - `make_http_get_request` -> `method='api'`
+                - `scrape_and_summarize_website_text` -> `method='scraping'`
+
+        4.  **Synthesize & Respond (Step 4):**
+            - After updating the KB, analyze the `result` data you received.
+            - If you need to search other stores, go back to Step 2 and repeat the cycle.
+            - Once you have enough information, present the top 3 products to the user, unless they ask for a different number.
+
+        By following this Read-Act-Write cycle, you constantly learn and improve your own performance.
         """
 
     def process_user_query(self, user_query: str) -> str:

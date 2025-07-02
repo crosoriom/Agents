@@ -30,7 +30,9 @@ def perform_initial_setup(kb: KnowledgeBase):
             name=store_info['name'],
             scope=store_info['scope'],
             mcp=verified_methods.get('mcp', False),
+            mcp_url=verified_methods.get('mcp_url'),
             api=verified_methods.get('api', False),
+            api_url=verified_methods.get('api_url'),
             scraping=True
         )
 
@@ -53,7 +55,7 @@ def main():
     
     # 3. Initialize the LLM Agent, giving it the populated Knowledge Base
     print("\n[Main] Initializing the AI Shopping Assistant with discovered store data...")
-    llm_agent = LLMAgent(knowledge_base=kb)
+    llm_agent = LLMAgent(kb)
     print("[Main] AI Assistant is ready.")
 
     print("\nWelcome to the AI Shopping Assistant!")

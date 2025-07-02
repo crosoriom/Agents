@@ -63,7 +63,7 @@ def verify_communication_methods(shop_name):
     mcp_url = f"https://mcp.{domain}"
     mcp_enabled = _check_endpoint(mcp_url)
 
-    return {'api': api_enabled, 'mcp': mcp_enabled}
+    return {'api': api_enabled, 'api_url': api_url, 'mcp': mcp_enabled, 'mcp_url': mcp_url}
 
 def get_coordinates_for_location(location_name):
     """
@@ -127,10 +127,10 @@ def get_national_stores():
     """Returns a curated list of prominent national stores."""
     print("[Discovery] Getting curated list of national stores...")
     stores = [
-        {'name': 'Best Buy', 'scope': 'national', 'mcp': False, 'api': True, 'scraping': True},
-        {'name': 'Walmart', 'scope': 'national', 'mcp': False, 'api': True, 'scraping': True},
-        {'name': 'Target', 'scope': 'national', 'mcp': False, 'api': False, 'scraping': True},
-        {'name': 'Micro Center', 'scope': 'national', 'mcp': False, 'api': False, 'scraping': True},
+        {'name': 'Best Buy', 'scope': 'national'},
+        {'name': 'Walmart', 'scope': 'national'},
+        {'name': 'Target', 'scope': 'national'},
+        {'name': 'Micro Center', 'scope': 'national'}
     ]
     print(f"  - Found {len(stores)} national stores.")
     return stores
@@ -139,9 +139,9 @@ def get_international_stores():
     """Returns a curated list of prominent international stores."""
     print("[Discovery] Getting curated list of international stores...")
     stores = [
-        {'name': 'Amazon', 'scope': 'international', 'mcp': True, 'api': True, 'scraping': True},
-        {'name': 'AliExpress', 'scope': 'international', 'mcp': False, 'api': False, 'scraping': True},
-        {'name': 'B&H Photo Video', 'scope': 'international', 'mcp': False, 'api': True, 'scraping': True},
+        {'name': 'Amazon', 'scope': 'international'},
+        {'name': 'AliExpress', 'scope': 'international'},
+        {'name': 'B&H Photo Video', 'scope': 'international'}
     ]
     print(f"  - Found {len(stores)} international stores.")
     return stores

@@ -1,77 +1,85 @@
 import requests
 import json
+import time
 from bs4 import BeautifulSoup
-from requests.api import request
+from knowledge_base import KnowledgeBase
 
-def scrape_and_summarize_website_text(url: str) -> str:
-    """
-    Fetches the content of a URL and returns a clean, summarized text version.
-    This tool is for accessing websites that do not have an API.
-    NOTE: This tool cannot reliably process sites that heavily rely on complex JavaScript.
-    """
-    print(f"    > Attempting to scrap and summarize URL: {url}")
-    try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-        response = requests.get(url, headers=headers, timeout=15)
-        response.raise_for_status()
+class ToolBox:
+    def __init__(self, kb: KnowledgeBase):
+        print("[ToolBox] Initialized with shared Knowledge Base.")
+        self.kb = kb
 
-        # Use BeautifulSoup to parse HTML and extract clean text
-        soup = BeautifulSoup(response.content, 'html.parser')
+    def _execute_and_time(self, func, *args, **kwargs):
+        """A helper to time the execution of a function."""
+        start_time = time.monotonic()
+        try:
+            result = func(*args, **kwargs)
+            success = "error" not in result
+        except Exception as e:
+            result = {"error": str(e)}
+            success = False
+        end_time = time.monotonic()
+        latency = end_time - start_time
+        # Return a dictionary that includes the result, success status, and latency
+        return {"result": result, "success": success, "latency": latency}
 
-        # Remove script and style elements
-        for script_or_style in soup(["script", "style"]):
-            script_or_style.decompose()
+    def get_shop_details_from_kb(self) -> str:
+        """Retrieves the full list of shops and their capabilities from the knowledge base."""
+        print("    > Querying Knowledge Base for all shop details...")
+        all_shops = self.kb.get_all_shops()
+        return json.dumps(all_shops)
 
-        # Get text and clean it up
-        text = soup.get_text()
-        lines = (line.strip() for line in text.splitlines())
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        clean_text = '\n'.join(chunk for chunk in chunks if chunk)
+    def update_shop_performance_in_kb(self, shop_name: str, method: str, latency: float, success: bool) -> str:
+        """
+        Updates the performance metrics (latency, success rate) for a shop in the Knowledge Base.
+        'method' must be one of ['mcp', 'api', 'scraping'].
+        """
+        print(f"    > Updating KB for '{shop_name}'...")
+        if method not in ['mcp', 'api', 'scraping']:
+            return json.dumps({"error": "Invalid method. Must be 'mcp', 'api', or 'scraping'."})
+        self.kb.update_shop_performance(shop_name, method, latency, success)
+        return json.dumps({"status": "success", "message": f"KB updated for {shop_name}."})
 
-        # Limit the output to avoid overwhelming the LLM context
-        max_lenght = 8000
-        print(f"    ✓ Scraped successfully. Returning summary of {len(clean_text)} chars.")
-        return json.dumps({'url': url, 'content': clean_text[:max_lenght]})
+    def make_http_get_request(self, url: str, params: dict, headers: dict) -> str:
+        """Makes a generic HTTP GET request and reports its performance."""
+        def request_logic():
+            response = requests.get(url, params=params, headers=headers, timeout=10)
+            response.raise_for_status()
+            return response.json()
+        
+        performance_data = self._execute_and_time(request_logic)
+        return json.dumps(performance_data)
 
-    except requests.exceptions.RequestException as e:
-        print(f"    ✗ Scraping failed with error: {e}")
-        return json.dumps({"error": f"HTTP request to {url} failed with error: {e}"})
+    def fetch_products_via_mcp(self, url: str, query: str) -> str:
+        """Attempts to fetch products from an MCP URL and reports its performance."""
+        def request_logic():
+            response = requests.post(url, json={"query": query}, timeout=4)
+            response.raise_for_status()
+            return response.json()
 
-def make_http_get_requests(url: str, params: dict, headers: dict):
-    """
-    Makes a generic HTTP GET request to a specified URL.
-    This is a powerful tool that allows the AI to interact with any web API.
-    The AI is responsible for constructing the correct URL, parameters, and headers.
-    
-    Args:
-        url (str): The URL to send the GET request to.
-        params (dict, optional): A dictionary of query parameters.
-        headers (dict, optional): A dictionary of HTTP headers.
+        performance_data = self._execute_and_time(request_logic)
+        return json.dumps(performance_data)
 
-    Returns:
-        str: The text content of the response, or an error message.
-    """
-    try:
-        response  = requests.get(url, params=params, headers=headers, timeout=10)
-        response.raise_for_status() # Raise an exception for bad status codes
-        # We return the response as a JSON formatted string
-        return json.dumps(response.json())
-    except requests.exceptions.RequestException as e:
-        return f"Error: HTTP request failed with error: {e}"
-    except json.JSONDecodeError:
-        return "Error: Failed to decode the response as JSON. The content may not be valid JSON."
+    def scrape_and_summarize_website_text(self, url: str) -> str:
+        """Scrapes a website and reports its performance."""
+        def request_logic():
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)...'}
+            response = requests.get(url, headers=headers, timeout=15)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, 'html.parser')
+            for el in soup(["script", "style"]): el.decompose()
+            text = '\n'.join(chunk for chunk in (phrase.strip() for line in (line.strip() for line in soup.get_text().splitlines()) for phrase in line.split("  ")) if chunk)
+            return {'url': url, 'content': text[:8000]}
 
-def fetch_products_via_mcp(shop_name: str, query: str):
-    """
-    A simulated implementation for fetching products via a futuristic MCP.
-    Use this for shops that explicitly support the Model Context Protocol.
-    """
-    if shop_name.lower() == "amazon":
-        # Simulate a successful MCP response
-        mcp_response = [
-            {'name': 'MCP Product: High-End Headphones', 'price': 349.99, 'quality_features': ['Excellent noise cancellation', '20-hour battery life'], 'stock': 50},
-            {'name': 'MCP Product: Mid-Range Earbuds', 'price': 129.99, 'quality_features': ['Good sound', 'Water resistant'], 'stock': 150}
-        ]
-        return json.dumps(mcp_response)
-    
-    return json.dumps({"error": f"MCP is not enabled or supported for {shop_name}."})
+        performance_data = self._execute_and_time(request_logic)
+        return json.dumps(performance_data)
+
+    def get_tool_functions(self) -> dict:
+        """Returns the dictionary of all tools available to the LLM."""
+        return {
+            "get_shop_details_from_kb": self.get_shop_details_from_kb,
+            "update_shop_performance_in_kb": self.update_shop_performance_in_kb, # Expose the new tool
+            "make_http_get_request": self.make_http_get_request,
+            "fetch_products_via_mcp": self.fetch_products_via_mcp,
+            "scrape_and_summarize_website_text": self.scrape_and_summarize_website_text,
+        }

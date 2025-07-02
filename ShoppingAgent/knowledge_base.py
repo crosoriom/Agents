@@ -23,6 +23,8 @@ class KnowledgeBase:
                                   mcp_enabled BOOLEAN,
                                   api_enabled BOOLEAN,
                                   scraping_enabled BOOLEAN,
+                                  mcp_url,
+                                  api_url,
                                   -- Performance Metrics
                                   mcp_latency REAL DEFAULT 0.0,
                                   mcp_success_rate REAL DEFAULT 1.0,
@@ -34,15 +36,15 @@ class KnowledgeBase:
                               )
                               """)
 
-    def add_shop(self, name, scope, mcp=False, api=False, scraping=True):
+    def add_shop(self, name, scope, mcp=False, api=False, scraping=True, mcp_url=None, api_url=None):
         """
         Adds a new shop if it doesn't exist. Uses INSERT OR IGNORE to prevent
         crashing on duplicate names.
         """
         with self.conn:
             cursor = self.conn.execute(
-                "INSERT OR IGNORE INTO shops (name, scope, mcp_enabled, api_enabled, scraping_enabled) VALUES (?, ?, ?, ?, ?)",
-                (name, scope, mcp, api, scraping)
+                "INSERT OR IGNORE INTO shops (name, scope, mcp_enabled, api_enabled, scraping_enabled, mcp_url, api_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (name, scope, mcp, api, scraping, mcp_url, api_url)
             )
             # The cursor.rowcount will be 1 if a row was inserted, and 0 if it was ignored.
             if cursor.rowcount > 0:
@@ -71,6 +73,7 @@ class KnowledgeBase:
         """Updates the performance metrics for a shop's communication method using a moving average"""
         shop = self.get_shop_by_name(shop_name)
         if not shop:
+            print(f"[KB] Could not find shop '{shop_name}' to update.")
             return None
 
         total_requests = shop['total_requests'] + 1
@@ -94,3 +97,4 @@ class KnowledgeBase:
                     WHERE name = ?""",
                 (new_latency, new_success_rate, total_requests, shop_name)
             )
+        print(f"[KB] Updated performance for '{shop_name}' ({method}): Success={success}, Latency={latency:.2f}s")
