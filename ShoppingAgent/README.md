@@ -27,35 +27,34 @@ This flowchart illustrates the agent's lifecycle, from the initial one-time setu
 graph TD
     subgraph "Phase 1: One-Time Setup (on first run)"
         direction TB
-        A[User Location Input] --> B{Discovery Engine};
-        B --> C[Identify Stores];
-        C --> D{Verify Methods & URLs};
-        D --> E[Populate Knowledge Base with Initial Data];
+        A[User Location Input] --> B{Discovery Engine}
+        B --> C[Identify Stores]
+        C --> D{Verify Methods & URLs}
+        D --> E[Populate Knowledge Base with Initial Data]
     end
 
     subgraph "Phase 2: User Query Cycle (for every request)"
         direction TB
-        F[User Query e.g., 'best 4k tv'] --> G{LLM Agent};
+        F[User Query: best 4k tv] --> G{LLM Agent}
 
         subgraph "Step 1: Read"
-            G -- 1. "What are my options?" --> H[Call Tool: get_shop_details_from_kb()];
-            H -- 2. Reads from --> KB[(Knowledge Base)];
-            KB -- 3. Returns store list, URLs, & performance data --> G;
+            G -->|Option check| H[Call Tool: get_shop_details_from_kb()]
+            H -->|Reads from| KB[(Knowledge Base)]
+            KB -->|Store list & performance| G
         end
 
         subgraph "Step 2: Plan & Act/Learn"
-            G -- 4. "Best Buy has a fast API. I'll use that." --> I{Choose Tool e.g., make_api_request};
-            I -- 5. Executes request --> BBApi((Best Buy API));
-            BBApi -- 6. Returns product data --> I;
-            I -- 7. AUTOMATICALLY updates performance --> KB;
-            I -- 8. Returns final product data --> G;
+            G -->|Selects best method| I{Choose Tool: e.g. make_api_request}
+            I -->|Executes request| BBApi((Best Buy API))
+            BBApi -->|Product data| I
+            I -->|Updates performance| KB
+            I -->|Returns data| G
         end
         
         subgraph "Step 3: Synthesize & Respond"
-            G -- 9. "I have the data. Time to formulate a response." --> J[Ranked Recommendations];
-            J -- 10. Presents final answer --> User([User]);
+            G -->|Formulates response| J[Ranked Recommendations]
+            J -->|Final answer| User([User])
         end
-
     end
 
     style G fill:#e6f3ff,stroke:#333,stroke-width:2px
