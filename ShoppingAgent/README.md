@@ -25,42 +25,47 @@ This flowchart illustrates the agent's lifecycle, from the initial one-time setu
 
 ```mermaid
 graph TD
-    subgraph "Phase 1: One-Time Setup (on first run)"
+    %% Phase 1: One-Time Setup (only on first run or when DB is deleted)
+    subgraph "Phase 1: One-Time Setup"
         direction TB
-        A[User Location Input] --> B{Discovery Engine};
-        B --> C[Identify Stores];
-        C --> D{Verify Methods & URLs};
-        D --> E[Populate Knowledge Base with Initial Data];
+        A["User Location Input"] --> B{"Discovery Engine"};
+        B --> C["Identify Local & National Stores"];
+        C --> D{"Verify Communication Methods & URLs"};
+        D --> E["Populate Knowledge Base with Initial Data"];
     end
 
+    %% Phase 2: Dynamic User Query Cycle
     subgraph "Phase 2: User Query Cycle (for every request)"
         direction TB
-        F[User Query e.g., 'best 4k tv'] --> G{LLM Agent};
+        F["User Query (e.g., 'best 4k tv')"] --> G{"LLM Agent"};
 
+        %% Step 1: Read from the agent's memory
         subgraph "Step 1: Read"
-            G -- 1. "What are my options?" --> H[Call Tool: get_shop_details_from_kb()];
-            H -- 2. Reads from --> KB[(Knowledge Base)];
-            KB -- 3. Returns store list, URLs, & performance data --> G;
+            G -- "Consults memory" --> H["Call Tool: get_shop_details_from_kb()"];
+            H --> KB[(Knowledge Base)];
+            KB --> G;
         end
 
-        subgraph "Step 2: Plan & Act/Learn"
-            G -- 4. "Best Buy has a fast API. I'll use that." --> I{Choose Tool e.g., make_api_request};
-            I -- 5. Executes request --> BBApi((Best Buy API));
-            BBApi -- 6. Returns product data --> I;
-            I -- 7. AUTOMATICALLY updates performance --> KB;
-            I -- 8. Returns final product data --> G;
+        %% Step 2: Act on a plan and learn from the result
+        subgraph "Step 2: Plan, Act & Learn"
+            G -- "Forms plan (e.g., 'Use Best Buy API')" --> I["Call Tool: make_api_request"];
+            I -- "Sends request" --> ExtAPI((External API e.g., Best Buy));
+            ExtAPI -- "Returns product data" --> I;
+            I -- "Tool automatically updates KB" --> KB;
+            I -- "Returns result to agent" --> G;
         end
         
+        %% Step 3: Present the final answer
         subgraph "Step 3: Synthesize & Respond"
-            G -- 9. "I have the data. Time to formulate a response." --> J[Ranked Recommendations];
-            J -- 10. Presents final answer --> User([User]);
+            G -- "Analyzes all results" --> J["Generates Ranked Recommendations"];
+            J --> User([User]);
         end
-
     end
 
+    %% Styling for clarity
     style G fill:#e6f3ff,stroke:#333,stroke-width:2px
     style KB fill:#e6ffe6,stroke:#333,stroke-width:2px
-    style BBApi fill:#f0f0f0,stroke:#333
+    style ExtAPI fill:#f0f0f0,stroke:#333
 ```
 
 ## Project Structure
