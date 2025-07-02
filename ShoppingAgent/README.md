@@ -38,22 +38,28 @@ graph TD
         F[User Query: best 4k tv] --> G{LLM Agent}
 
         subgraph "Step 1: Read"
-            G -->|Option check| H[Call Tool: get_shop_details_from_kb()]
-            H -->|Reads from| KB[(Knowledge Base)]
-            KB -->|Store list & performance| G
+            H[Call Tool: get_shop_details_from_kb()] 
+            KB[(Knowledge Base)]
+            G -->|Option check| H
+            H -->|Reads from| KB
+            KB -->|Returns store list & performance| G
         end
 
         subgraph "Step 2: Plan & Act/Learn"
-            G -->|Selects best method| I{Choose Tool: e.g. make_api_request}
-            I -->|Executes request| BBApi((Best Buy API))
+            I{Choose Tool: make_api_request}
+            BBApi((Best Buy API))
+            G -->|Select method| I
+            I -->|Executes request| BBApi
             BBApi -->|Product data| I
-            I -->|Updates performance| KB
+            I -->|Update performance| KB
             I -->|Returns data| G
         end
         
         subgraph "Step 3: Synthesize & Respond"
-            G -->|Formulates response| J[Ranked Recommendations]
-            J -->|Final answer| User([User])
+            J[Ranked Recommendations]
+            User([User])
+            G -->|Formulates response| J
+            J -->|Final answer| User
         end
     end
 
