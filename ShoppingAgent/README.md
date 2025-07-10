@@ -195,3 +195,25 @@ Based on your request, I found these great options for affordable 4K TVs at Best
     *   **Store:** Best Buy
 **************************************************
 ```
+
+##  GUI Dashboard (Streamlit)
+
+This project also includes an interactive web-based dashboard built with Streamlit, providing a user-friendly interface for the agent.
+
+### How to Run the GUI
+
+1.  Ensure you have completed the setup steps, including installing dependencies and creating your `.env` file.
+
+2.  Run the following command in your terminal from the project's root directory:
+
+    ```bash
+    streamlit run app.py
+    ```
+
+3.  Your web browser will open with the dashboard.
+
+4.  **First, initialize the agent** by entering a location and clicking the "Initialize Agent" button.
+
+5.  **Then, enter your product query** and click "Search for Products" to receive the AI's recommendation.
+
+![Streamlit App Screenshot](<agent_screenshot.png>)
