@@ -19,8 +19,8 @@ class KnowledgeBase:
                                   mcp_enabled BOOLEAN,
                                   api_enabled BOOLEAN,
                                   scraping_enabled BOOLEAN,
-                                  mcp_url,
-                                  api_url,
+                                  mcp_url TEXT,
+                                  api_url TEXT,
                                   -- Performance Metrics
                                   mcp_latency REAL DEFAULT 0.0,
                                   mcp_success_rate REAL DEFAULT 1.0,
@@ -32,7 +32,7 @@ class KnowledgeBase:
                               )
                               """)
 
-    def add_shop(self, name, scope, mcp=False, api=False, scraping=True, mcp_url=None, api_url=None):
+    def add_shop(self, name, scope, mcp_enabled=False, api_enabled=False, scraping_enabled=True, mcp_url=None, api_url=None):
         """
         Adds a new shop if it doesn't exist. Uses INSERT OR IGNORE to prevent
         crashing on duplicate names.
@@ -40,7 +40,7 @@ class KnowledgeBase:
         with self.conn:
             cursor = self.conn.execute(
                 "INSERT OR IGNORE INTO shops (name, scope, mcp_enabled, api_enabled, scraping_enabled, mcp_url, api_url) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (name, scope, mcp, api, scraping, mcp_url, api_url)
+                (name, scope, mcp_enabled, api_enabled, scraping_enabled, mcp_url, api_url)
             )
             # The cursor.rowcount will be 1 if a row was inserted, and 0 if it was ignored.
             if cursor.rowcount > 0:

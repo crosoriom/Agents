@@ -74,7 +74,7 @@ class ToolBox:
             soup = BeautifulSoup(response.content, 'html.parser')
             for el in soup(["script", "style"]): el.decompose()
             text = '\n'.join(chunk for chunk in (phrase.strip() for line in (line.strip() for line in soup.get_text().splitlines()) for phrase in line.split("  ")) if chunk)
-            result = {'url': url, 'content': text[:8000]}
+            result = {'url': url, 'content': text[:20000]}
             success = True
         except Exception as e:
             result = {"error": str(e)}

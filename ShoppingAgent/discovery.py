@@ -63,7 +63,12 @@ def verify_communication_methods(shop_name):
     mcp_url = f"https://mcp.{domain}"
     mcp_enabled = _check_endpoint(mcp_url)
 
-    return {'api': api_enabled, 'api_url': api_url, 'mcp': mcp_enabled, 'mcp_url': mcp_url}
+    return {
+        'api_enabled': api_enabled,
+        'api_url': api_url,
+        'mcp_enabled': mcp_enabled,
+        'mcp_url': mcp_url if mcp_enabled else None
+    }
 
 def get_coordinates_for_location(location_name):
     """
@@ -82,7 +87,7 @@ def get_coordinates_for_location(location_name):
         return coords
     else:
         print(f"  - Could not find coordinates for '{location_name}'. Using default.")
-        return "40.7128,-74.0060" # Default to NYC
+        return "5.06889, -75.51738" # Default to MZLS
 
 def find_local_stores(location_name, radius_metters=50000):
     """
@@ -127,10 +132,9 @@ def get_national_stores():
     """Returns a curated list of prominent national stores."""
     print("[Discovery] Getting curated list of national stores...")
     stores = [
-        {'name': 'Best Buy', 'scope': 'national'},
-        {'name': 'Walmart', 'scope': 'national'},
-        {'name': 'Target', 'scope': 'national'},
-        {'name': 'Micro Center', 'scope': 'national'}
+        {'name': 'Panamericana', 'scope': 'national'},
+        {'name': 'Exito', 'scope': 'national'},
+        {'name': 'Ktronix', 'scope': 'national'},
     ]
     print(f"  - Found {len(stores)} national stores.")
     return stores
@@ -141,7 +145,7 @@ def get_international_stores():
     stores = [
         {'name': 'Amazon', 'scope': 'international'},
         {'name': 'AliExpress', 'scope': 'international'},
-        {'name': 'B&H Photo Video', 'scope': 'international'}
+        {'name': 'ebay', 'scope': 'international'}
     ]
     print(f"  - Found {len(stores)} international stores.")
     return stores

@@ -40,7 +40,7 @@ class LLMAgent:
 
         2.  **Plan & Act (Step 2):**
             - Analyze the KB data and the user's request.
-            - Formulate a plan, prioritizing the best-performing methods (MCP > API > Scraping). Use the latency and success rates from the KB to inform your choice.
+            - Formulate a plan, prioritizing the best-performing methods (Scraping > API > MCP). Use the latency and success rates from the KB to inform your choice.
             - Execute the appropriate communication tool (`fetch_products_via_mcp`, `make_http_get_request`, or `scrape_and_summarize_website_text`).
             - **CRITICAL:** The output from these tools is a JSON string containing `result`, `success`, and `latency`. You MUST parse this JSON to get the data.
 
