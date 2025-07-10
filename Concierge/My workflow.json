@@ -1,0 +1,801 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        380
+      ],
+      "id": "cd410df0-fb5f-4e4f-ad98-9df9a0ffe617",
+      "name": "WhatsApp Trigger",
+      "webhookId": "ae0fc475-64da-46b7-9f52-b4362187e9e7",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "OosaWu45jgK12QTT",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "729715586889694",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "textBody": "={{ $json.helpText }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        620,
+        780
+      ],
+      "id": "4820b312-cbc6-47f9-ac5c-097ac460a4f4",
+      "name": "Send message",
+      "webhookId": "f8be57a7-fa54-4ff3-b6f4-4f8a59138af4",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "JNqnTMvysH2zjVKj",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7b0d3b9b-62b1-464e-b638-5c29e53c8cc5",
+                    "leftValue": "={{ $json.messages[0].text.body }}",
+                    "rightValue": "/briefing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "report"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "55feeef6-8494-45a6-91db-0ee354ce089e",
+                    "leftValue": "={{ $json.messages[0].text.body }}",
+                    "rightValue": "/addtask",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "task"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d487d2b3-d3be-4b38-b18c-2e538262c539",
+                    "leftValue": "={{ $json.messages[0].text.body }}",
+                    "rightValue": "/addevent",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "event"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1a7ed74d-e153-4a55-be4d-69f2eab1f6ff",
+                    "leftValue": "={{ $json.messages[0].text.body }}",
+                    "rightValue": "/spark",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "idea"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.messages[0].text.body }}",
+                    "rightValue": "/help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    },
+                    "id": "d9f25950-e44b-4942-9065-b06e3651b46f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        80,
+        340
+      ],
+      "id": "4cf4765e-5392-4d53-bd4e-28c869d13389",
+      "name": "Router"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0b885b59-e68a-4e23-9208-dab7105a17a8",
+              "name": "helpText",
+              "value": "*Welcome to Concierge!*  Here are the commands I understand: • */briefing* - Get your personalized daily briefing (weather, calendar, news). • */addtask [your task]* - Add a new task to your to-do list. • */addevent [your event]* - Add a new task to your to-do list. • */spark [your idea]* - Brainstorm a concept.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        420,
+        780
+      ],
+      "id": "c8401429-3c5f-4dc4-a95a-bc5c0d4d5ee8",
+      "name": "helpText"
+    },
+    {
+      "parameters": {
+        "cityName": "Manizales",
+        "language": "es"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        420,
+        -120
+      ],
+      "id": "b72fd3bb-302d-4c7b-822d-69475be7fbfd",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "aWsTmpt9ptKJcHrc",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://newsapi.org/v2/top-headlines?country=us&pageSize=3&apiKey=de079afc191e4ab9a217aebf80186475",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        40
+      ],
+      "id": "011fb7d8-d3a6-4c3e-95e5-5c6251927c1f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "729715586889694",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        -40
+      ],
+      "id": "8f88065c-2121-49b3-9fc5-e999db53e4fa",
+      "name": "Send message1",
+      "webhookId": "f8be57a7-fa54-4ff3-b6f4-4f8a59138af4",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "JNqnTMvysH2zjVKj",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0b885b59-e68a-4e23-9208-dab7105a17a8",
+              "name": "taskContent",
+              "value": "={{ $json.messages[0].text.body.split(' ').slice(1).join(' ') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        420,
+        200
+      ],
+      "id": "1a1fdd7d-d6f3-4e95-8422-504903987e09",
+      "name": "addTask"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "project": {
+          "__rl": true,
+          "value": "2356647539",
+          "mode": "list",
+          "cachedResultName": "Mis Cosas 🤹🏼‍♀️"
+        },
+        "content": "={{ $json.taskContent }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.todoist",
+      "typeVersion": 2.1,
+      "position": [
+        620,
+        200
+      ],
+      "id": "815351cd-e224-4ed8-812b-132993b5aec7",
+      "name": "Create a task",
+      "credentials": {
+        "todoistOAuth2Api": {
+          "id": "ZYGqJ10mfEweAjrS",
+          "name": "Todoist account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.ideaPrompt }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        820,
+        600
+      ],
+      "id": "51a4af88-d0a1-498a-968b-a8c0c60f3510",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        820
+      ],
+      "id": "9ba33d72-d688-4591-b653-ff3aa38fed79",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "UYq06vjHuP6wifo7",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        620,
+        -40
+      ],
+      "id": "4be50fe4-3b3a-4449-b0a9-7954a47ea4c2",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a personal manager. You will receive the event that the user has added, and you will add to the best place of the schedule based on your judgment or the user query. Add information to the event in google calendar.\n\nUser query: {{ $json.taskContent }}\nCurrent date: {{$now}}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        820,
+        380
+      ],
+      "id": "251bcf30-b12a-4657-ae33-029d60311b9b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "729715586889694",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "=Task added: {{ $('addTask').item.json.taskContent }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        820,
+        200
+      ],
+      "id": "573b1da0-c9a9-4213-819e-d94278d2a79f",
+      "name": "Send message4",
+      "webhookId": "f8be57a7-fa54-4ff3-b6f4-4f8a59138af4",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "JNqnTMvysH2zjVKj",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0b885b59-e68a-4e23-9208-dab7105a17a8",
+              "name": "taskContent",
+              "value": "={{ $json.messages[0].text.body.split(' ').slice(1).join(' ') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        420,
+        380
+      ],
+      "id": "80aafbb9-a04e-4aa2-b521-9c7555274eba",
+      "name": "Event"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "cris.oso.zero@gmail.com",
+          "mode": "list",
+          "cachedResultName": "cris.oso.zero@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        980,
+        520
+      ],
+      "id": "ced92d55-d2ad-474f-8d52-beb29d7bacff",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "iKqQFJdv0nyRp2Zy",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "729715586889694",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        380
+      ],
+      "id": "c80cbc6b-f065-4467-bbb8-412242838e2c",
+      "name": "Send message3",
+      "webhookId": "f8be57a7-fa54-4ff3-b6f4-4f8a59138af4",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "JNqnTMvysH2zjVKj",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0b885b59-e68a-4e23-9208-dab7105a17a8",
+              "name": "ideaPrompt",
+              "value": "=You are a creative director. Take the following user idea and expand it into a rich, detailed concept. Then, write a single, vivid sentence describing this concept. Talk to the user in spanish. Limit the output to 2000 characters\n\nUser Idea: {{ $json.messages[0].text.body.split(' ').slice(1).join(' ') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        420,
+        600
+      ],
+      "id": "dd8bf284-8433-4838-a69d-8cc25c83cff5",
+      "name": "generateIdea"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "729715586889694",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.messages[0].from }}",
+        "textBody": "=",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        600
+      ],
+      "id": "94b93d5b-1a7e-483e-b68b-ae3f207e815d",
+      "name": "Send message5",
+      "webhookId": "f8be57a7-fa54-4ff3-b6f4-4f8a59138af4",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "JNqnTMvysH2zjVKj",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are \"Concierge,\" a world-class personal assistant...\n\nInput Data:\n{{ JSON.stringify($json) }}\n\nAlso check the calendar for future events\nTalk in spanish.\nYour generated summary:",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        820,
+        -40
+      ],
+      "id": "2c782e34-e2d1-44fe-ba64-fe2237250ddc",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "crosoriom@unal.edu.co",
+          "mode": "id"
+        },
+        "limit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Limit', ``, 'number') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        980,
+        100
+      ],
+      "id": "bb7e9032-e0c0-4b70-8b45-b32d4160391f",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "iKqQFJdv0nyRp2Zy",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "addTask",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "generateIdea",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "helpText",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "helpText": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "addTask": {
+      "main": [
+        [
+          {
+            "node": "Create a task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a task": {
+      "main": [
+        [
+          {
+            "node": "Send message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Send message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Event": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generateIdea": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "23158124-2da3-4eda-984f-25eafb0f6acb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "80ef70cff6c066d78ab9ddb79707c082b6f157566eced7bcdb2ade8c4d18e89a"
+  },
+  "id": "2obVUXodaGLgCP9M",
+  "tags": []
+}
