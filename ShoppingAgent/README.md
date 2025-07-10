@@ -107,18 +107,9 @@ python -m venv venv
 .\venv\Scripts\activate
 ```
 
-### 3. Create and Populate `requirements.txt`
+### 3. `requirements.txt`
 
-Create a file named `requirements.txt` and add the following lines:
-
-```
-google-generativeai
-requests
-python-dotenv
-beautifulsoup4
-```
-
-Then, install the dependencies:
+Install the dependencies:
 
 ```bash
 pip install -r requirements.txt
